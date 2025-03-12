@@ -44,8 +44,8 @@ module node_4x4_32b #(
 
     reg [1:0] input_sel;
 
-    reg [1:0] x_coord;
-    reg [1:0] y_coord;
+    reg [5:0] col_coord;
+    reg [5:0] row_coord;
 
     reg [31:0] data_buffer;
     reg [4:0] addr_buffer;
@@ -61,16 +61,17 @@ module node_4x4_32b #(
     reg [5:0] id_x_coord;
     reg [5:0] id_y_coord;
 
-
+    wire [31:0] E = id_map[3];
+    wire [31:0] E_1 = id_map[3] % 6;
     //Initialise
     initial begin
         input_sel <= 0;
 
-        //x_coord <= ID % 4;
-        //y_coord <= ID / 4;
+        //col_coord <= ID % 4;
+        //row_coord <= ID / 4;
 
-        x_coord <= id_map[ID] / 5;
-        y_coord <= id_map[ID] % 5;
+        col_coord <= id_map[ID] % 6;
+        row_coord <= id_map[ID] / 6;
     end
 
 
@@ -150,19 +151,19 @@ module node_4x4_32b #(
         id_x_coord = addr_buffer / 6;
         id_y_coord = addr_buffer % 6;
 
-        if (id_x_coord < x_coord) begin
+        if (id_y_coord > col_coord) begin
             out_data_3 = data_buffer;
             out_addr_3 = addr_buffer;
             out_valid_3 = 1;
-        end else if (id_x_coord > x_coord) begin
+        end else if (id_y_coord < col_coord) begin
             out_data_1 = data_buffer;
             out_addr_1 = addr_buffer;
             out_valid_1 = 1;
-        end else if (id_y_coord < y_coord) begin
+        end else if (id_x_coord > row_coord) begin
             out_data_4 = data_buffer;
             out_addr_4 = addr_buffer;
             out_valid_4 = 1;
-        end else if (id_y_coord > y_coord) begin
+        end else if (id_x_coord < row_coord) begin
             out_data_2 = data_buffer;
             out_addr_2 = addr_buffer;
             out_valid_2 = 1;
